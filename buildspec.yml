@@ -1,10 +1,19 @@
 version: 0.2
 
 phases:
-  
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region eu-west-1)
   build:
     commands:
-      - chmod u+x create-and-push-image.sh 
-      - ./create-and-push-image.sh cifar10example
-
- 
+      - echo Build started on `date`
+      - echo Building the Docker image...    
+      - account=$(aws sts get-caller-identity --query Account --output text)      
+      - docker build -t cifar10example:latest .
+      - docker tag cifar10example:latest ${account}.dkr.ecr.us-east-1.amazonaws.com/cifar10example:latest    
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push ${account}.dkr.ecr.us-east-1.amazonaws.com/cifar10example:latest
