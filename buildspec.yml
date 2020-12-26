@@ -1,0 +1,10 @@
+version: 0.2
+
+phases:
+  
+  build:
+    commands:
+      - chmod u+x create-and-push-image.sh 
+      - ./create-and-push-image.sh cifar10example
+
+ 
