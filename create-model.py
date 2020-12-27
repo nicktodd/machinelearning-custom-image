@@ -30,8 +30,8 @@ print(session.upload_data('dummy.csv', bucket, prefix + '/val'))
 est = sagemaker.estimator.Estimator(ecr_image,
                                     role, 
                                     train_instance_count=1, 
-                                    train_instance_type='local', # use local mode
-                                    #train_instance_type='ml.m5.xlarge',
+                                    #train_instance_type='local', # use local mode
+                                    train_instance_type='ml.m5.xlarge', # can't use local when running in CodeCommit
                                     base_job_name=prefix)
 
 
