@@ -1,32 +1,62 @@
-# Copyright 2017-2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License"). You
-# may not use this file except in compliance with the License. A copy of
-# the License is located at
-#
-#     http://aws.amazon.com/apache2.0/
-#
-# or in the "license" file accompanying this file. This file is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-# ANY KIND, either express or implied. See the License for the specific
-# language governing permissions and limitations under the License.
+# Part of the implementation of this container is based on the Amazon SageMaker Apache MXNet container.
+# https://github.com/aws/sagemaker-mxnet-container
 
-# For more information on creating a Dockerfile
-# https://docs.docker.com/compose/gettingstarted/#step-2-create-a-dockerfile
-# https://github.com/awslabs/amazon-sagemaker-examples/master/advanced_functionality/pytorch_extending_our_containers/pytorch_extending_our_containers.ipynb
-# SageMaker PyTorch image
+FROM ubuntu:16.04
 
-FROM 520713654638.dkr.ecr.eu-west-1.amazonaws.com/sagemaker-pytorch:0.4.0-cpu-py3
+LABEL maintainer="Amazon AI"
 
-ENV PATH="/opt/ml/code:${PATH}"
+# Defining some variables used at build time to install Python3
+ARG PYTHON=python3
+ARG PYTHON_PIP=python3-pip
+ARG PIP=pip3
+ARG PYTHON_VERSION=3.6.6
 
-# /opt/ml and all subdirectories are utilized by SageMaker, we use the /code subdirectory to store our user code.
-COPY /cifar10 /opt/ml/code
+# Install some handful libraries like curl, wget, git, build-essential, zlib
+RUN apt-get update && apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        curl \
+        wget \
+        git \
+        libopencv-dev \
+        openssh-client \
+        openssh-server \
+        vim \
+        zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# this environment variable is used by the SageMaker PyTorch container to determine our user code directory.
-ENV SAGEMAKER_SUBMIT_DIRECTORY /opt/ml/code
+# Installing Python3
+RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz && \
+        tar -xvf Python-$PYTHON_VERSION.tgz && cd Python-$PYTHON_VERSION && \
+        ./configure && make && make install && \
+        apt-get update && apt-get install -y --no-install-recommends libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev && \
+        make && make install && rm -rf ../Python-$PYTHON_VERSION* && \
+        ln -s /usr/local/bin/pip3 /usr/bin/pip
 
-# this environment variable is used by the SageMaker PyTorch container to determine our program entry point
-# for training and serving.
-# For more information: https://github.com/aws/sagemaker-pytorch-container
-ENV SAGEMAKER_PROGRAM cifar10.py
+# Upgrading pip and creating symbolic link for python3
+RUN ${PIP} --no-cache-dir install --upgrade pip
+RUN ln -s $(which ${PYTHON}) /usr/local/bin/python
+
+WORKDIR /
+
+# Installing numpy, pandas, scikit-learn, scipy
+RUN ${PIP} install --no-cache --upgrade \
+        numpy==1.14.5 \
+        pandas==0.24.1 \
+        scikit-learn==0.20.3 \
+        requests==2.21.0 \
+        scipy==1.2.1
+
+# Setting some environment variables.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib" \
+    PYTHONIOENCODING=UTF-8 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+COPY code/* /
+
+ENTRYPOINT ["python", "main.py"]

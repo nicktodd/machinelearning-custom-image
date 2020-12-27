@@ -11,14 +11,14 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...    
       - account=$(aws sts get-caller-identity --query Account --output text)      
-      - docker build -t cifar10example:latest .
-      - docker tag cifar10example:latest ${account}.dkr.ecr.eu-west-1.amazonaws.com/cifar10example:latest
+      - docker build -t custommlimage:latest .
+      - docker tag custommlimage:latest ${account}.dkr.ecr.eu-west-1.amazonaws.com/customlimage:latest
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push ${account}.dkr.ecr.eu-west-1.amazonaws.com/cifar10example:latest
-  artifacts:
-    dockerImage: ${account}.dkr.ecr.eu-west-1.amazonaws.com/cifar10example:latest
+      - docker push ${account}.dkr.ecr.eu-west-1.amazonaws.com/custommlimage:latest
+artifacts:
+  name: ${account}.dkr.ecr.eu-west-1.amazonaws.com/custommlimage:latest
 
   
