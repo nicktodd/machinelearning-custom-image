@@ -13,7 +13,7 @@ phases:
       - account=$(aws sts get-caller-identity --query Account --output text)      
       - docker build -t cifar10example:latest .
       - docker tag cifar10example:latest ${account}.dkr.ecr.eu-west-1.amazonaws.com/cifar10example:latest
-      - dockerImage=cifar10example:latest ${account}.dkr.ecr.eu-west-1.amazonaws.com/cifar10example:latest
+      - dockerImage=$(${account}.dkr.ecr.eu-west-1.amazonaws.com/cifar10example:latest)
       - export dockerImage
   post_build:
     commands:
