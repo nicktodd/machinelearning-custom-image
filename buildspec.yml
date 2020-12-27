@@ -12,7 +12,7 @@ phases:
       - echo Building the Docker image...    
       - account=$(aws sts get-caller-identity --query Account --output text)      
       - docker build -t custommlimage:latest .
-      - docker tag custommlimage:latest ${account}.dkr.ecr.eu-west-1.amazonaws.com/customlimage:latest
+      - docker tag custommlimage:latest ${account}.dkr.ecr.eu-west-1.amazonaws.com/custommlimage:latest
   post_build:
     commands:
       - echo Build completed on `date`
