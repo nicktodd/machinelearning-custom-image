@@ -7,7 +7,7 @@ client = boto3.client('sts')
 account = client.get_caller_identity()['Account']
 
 
-role = "arn:aws:iam::963778699255:role/service-role/AmazonSageMaker-ExecutionRole-20201209T094957" #get_execution_role()
+role = "arn:aws:iam::963778699255:role/service-role/AmazonSageMaker-ExecutionRole-20190723T151113" #get_execution_role()
 
 region = boto3.Session().region_name
 sagemaker_session = sagemaker.session.Session()
