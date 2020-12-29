@@ -60,7 +60,7 @@ def train():
         for x in range(epochs):
             print("\nRunning epoch {0}...".format(x))
 
-            time.sleep(30)
+            time.sleep(5)
             
             if (signal_handler.exit_now):
                 print("Received SIGTERM/SIGINT. Saving training state and exiting.")
